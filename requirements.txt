@@ -1,0 +1,8 @@
+llama_index
+openai
+psycopg2
+pyyaml
+python-dotenv
+cohere
+sqlalchemy
+streamlit
