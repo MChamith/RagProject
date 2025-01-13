@@ -77,22 +77,12 @@ class VectorStore:
             original_text_metadata_key="original_text",
         )
 
-        # sentence_context = ServiceContext.from_defaults(
-        #     llm=llm,
-        #     embed_model=embed_model,
-        #     node_parser=node_parser,
-        # )
-
         Settings.llm = llm
         Settings.embed_model = embed_model
         Settings.node_parser = node_parser
 
-
-
         self.create_vector_store(conn_string, db_name, table_name)
         self.storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
-
-
         self.sentence_index = VectorStoreIndex.from_documents(
             documents, storage_context=self.storage_context
         )
@@ -102,7 +92,6 @@ class VectorStore:
     def process_document(self, file_path):
 
         print('processing uploaded documents')
-
         reader = PDFReader()
         documents = reader.load_data(file_path)
 
@@ -143,9 +132,7 @@ class VectorStore:
     def create_query_engine(self,  similarity_top_k=6, rerank_top_n=2):
 
         cohere_rerank = CohereRerank(top_n=rerank_top_n)
-
         postproc = MetadataReplacementPostProcessor(target_metadata_key="window")
-
         self.query_engine = self.sentence_index.as_query_engine(
             similarity_top_k=similarity_top_k, node_postprocessors=[postproc, cohere_rerank]
         )
@@ -153,9 +140,7 @@ class VectorStore:
     def evaluate_response(self,  query, response):
 
         context = [node.dict()['node']['text'] for node in response.source_nodes]
-
         context_relevancy = ContextRelevancyEvaluator(llm=OpenAI(temperature=0, model="gpt-4"))
-
         answer_relevancy = AnswerRelevancyEvaluator(
             llm=OpenAI(temperature=0, model="gpt-3.5-turbo"),
         )
@@ -191,7 +176,6 @@ class VectorStore:
                    context_relevancy=context_relevancy)
 
         llm = OpenAI(model="gpt-4", temperature=0.1)
-        # Call the LLM
         output = llm.predict(PromptTemplate(chat_template))
         print('final output ' + str(output))
         return output
@@ -202,38 +186,6 @@ class VectorStore:
             self.create_query_engine()
 
         window_response = self.query_engine.query(msg)
-
         output = self.provide_response(msg, window_response)
 
         return output
-
-# vector_store = VectorStore()
-# conn_string = create_connection_string()
-#
-#
-# documents = SimpleDirectoryReader("documents").load_data()
-# print("Document ID:", documents[0].doc_id)
-#
-# for document in documents:
-#     document.text = document.text.replace('\x00', '')
-#
-# vector_store.process_document(documents)
-#
-# vector_store.create_query_engine()
-#
-# new_docs = SimpleDirectoryReader("new_document").load_data()
-# print("Document ID:", documents[0].doc_id)
-# for document in new_docs:
-#     document.text = document.text.replace('\x00', '')
-#
-# vector_store.process_document(new_docs)
-# chat_input  = "Does NAS and HPO improve accuracy?"
-# window_response = vector_store.query_engine.query(
-#     chat_input
-# )
-#
-# print(dir(window_response.response))
-# print(type(window_response))
-# pprint_response(window_response, show_source=True)
-#
-# vector_store.provide_response(chat_input, window_response)

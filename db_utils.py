@@ -14,17 +14,14 @@ def create_connection_string():
 
 
 def create_database(db_name):
-    # Load database connection credentials from environment variables
     conn_string = create_connection_string()
 
     try:
-        # Connect to the default database with autocommit mode
-        conn = psycopg2.connect(conn_string)
-        conn.autocommit = True  # Set autocommit before creating cursor
 
+        conn = psycopg2.connect(conn_string)
+        conn.autocommit = True
         cursor = conn.cursor()
         try:
-            # Check if the database already exists
             cursor.execute(
                 sql.SQL("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s"),
                 [db_name]
@@ -32,7 +29,6 @@ def create_database(db_name):
             if cursor.fetchone():
                 print(f"Database {db_name} already exists.")
             else:
-                # Create a new database
                 cursor.execute(
                     sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name))
                 )

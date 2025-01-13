@@ -2,9 +2,7 @@ import streamlit as st
 import os
 from typing import List
 import tempfile
-
 from dotenv import load_dotenv
-
 from VectorStore import VectorStore
 
 
@@ -40,7 +38,6 @@ def main():
     if "vector_store" not in st.session_state:
         st.session_state.vector_store = VectorStore()
 
-    # Sidebar for PDF upload
     with st.sidebar:
         st.header("Document Upload")
         uploaded_file = st.file_uploader("Upload your PDF document", type=['pdf'])
@@ -48,45 +45,30 @@ def main():
         if uploaded_file is not None:
             if st.button("Process Document"):
                 with st.spinner("Processing document..."):
-
                     file_path = save_uploaded_file(uploaded_file)
-
-                    # Here you would call your RAG pipeline
                     st.session_state.vector_store.process_document(file_path)
-
                     st.success("Document processed successfully!")
-
-                    # Clear chat history when new document is processed
                     if "messages" in st.session_state:
                         st.session_state.messages = []
 
-    # Initialize chat history
     messages = initialize_chat_history()
 
-    # Display chat messages
     for message in messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Chat input
+
     if prompt := st.chat_input("Ask a question about your document"):
-        # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # Display user message
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Display assistant response
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                # Here you would call your RAG query function
+
                 response = st.session_state.vector_store.process_msg(prompt)
-                # response = rag_query(prompt)
-
                 st.markdown(response)
-
-                # Add assistant response to chat history
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
 
