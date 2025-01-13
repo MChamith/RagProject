@@ -34,5 +34,5 @@ After uploading a new document `LLM_based_Web_App_for_FL.pdf` that contains info
 
 ![Answer4](documents/prompt4.png)
 
-![Answer4](documents/prompt4.png)
+![Answer4](documents/prompt5.png)
 
